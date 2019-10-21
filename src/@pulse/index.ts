@@ -1,0 +1,1 @@
+export { PulseModule } from './pulse.module';
