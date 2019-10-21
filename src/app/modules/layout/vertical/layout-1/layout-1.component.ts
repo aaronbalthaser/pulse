@@ -1,18 +1,17 @@
-import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { PulseConfigService } from '@pulse/services/config.service';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  selector: 'vertical-layout-1',
+  styleUrls: ['./layout-1.component.scss'],
+  templateUrl: './layout-1.component.html'
 })
 
-export class AppComponent implements OnInit, OnDestroy {
-  // Public 
+export class VerticalLayout1Component implements OnInit, OnDestroy {
+  // Public
   public config: any;
 
   // Private
@@ -20,15 +19,10 @@ export class AppComponent implements OnInit, OnDestroy {
 
   /**
    * Constructor
-   * 
-   * @param {DOCUMENT} document
+   *
    * @param {PulseConfigService} _pulseConfigService
    */
-  constructor(
-    @Inject(DOCUMENT) private document: any,
-    private _pulseConfigService: PulseConfigService
-  ) {
-
+  constructor(private _pulseConfigService: PulseConfigService) {
     // Set the private defaults
     this._unsubscribeAll = new Subject();
   }
@@ -36,13 +30,15 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this._pulseConfigService.config
       .pipe(takeUntil(this._unsubscribeAll))
-      .subscribe((config) => {
-        // set initial application configurations
+      .subscribe(config => {
         this.config = config;
+
+        console.log(this.config.layout.style);
       });
   }
 
   ngOnDestroy(): void {
+    // Unsubscribe from all subscriptions
     this._unsubscribeAll.next();
     this._unsubscribeAll.complete();
   }

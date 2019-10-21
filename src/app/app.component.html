@@ -1,5 +1,7 @@
-<div>
-  <div class="splash-icon-container">
-    <fa-icon class="splash-icon" [icon]="faWaveSquare"></fa-icon>
-  </div>
-</div>
+<ng-container *ngIf="config.layout.style === 'vertical-layout-1'">
+  <vertical-layout-1></vertical-layout-1>
+</ng-container>
+
+<ng-container *ngIf="config.layout.style === 'vertical-layout-2'">
+  <vertical-layout-2></vertical-layout-2>
+</ng-container>
