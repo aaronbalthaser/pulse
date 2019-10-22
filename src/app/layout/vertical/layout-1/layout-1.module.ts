@@ -1,17 +1,17 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
+import { ContentModule } from 'app/layout/components/content/content.module';
 
 import { VerticalLayout1Component } from './layout-1.component';
 
 @NgModule({
   imports: [
-    CommonModule
+    ContentModule
   ],
   declarations: [
     VerticalLayout1Component
   ],
   exports: [
-
     VerticalLayout1Component
   ]
 })
