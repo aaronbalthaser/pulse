@@ -11,6 +11,7 @@ import { PulseConfigService } from '@pulse/services/config.service';
 })
 
 export class VerticalLayout1Component implements OnInit, OnDestroy {
+
   // Public
   public config: any;
 
