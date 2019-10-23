@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 
 /* Third Party Modules */
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 /* Pulse Modules */
 import { PulseModule } from '@pulse';
@@ -31,6 +32,7 @@ const appRoutes = [
   imports: [
     BrowserModule,
     FontAwesomeModule,
+    FlexLayoutModule,
     RouterModule.forRoot(appRoutes),
 
     /* Pulse Modules */

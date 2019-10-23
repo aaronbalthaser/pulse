@@ -3,6 +3,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { PulseConfigService } from '@pulse/services/config.service';
+import { PulseMediaService } from '@pulse/services/media.service';
 
 @Component({
   selector: 'pulse-sidebar',
@@ -23,7 +24,11 @@ export class PulseSidebarComponent implements OnInit, OnDestroy {
    *
    * @param {PulseConfigService} _pulseConfigService
    */
-  constructor(private _pulseConfigService: PulseConfigService) {
+  constructor(
+    private _pulseConfigService: PulseConfigService,
+    private _pulseMediaService: PulseMediaService
+    ) {
+      
     // Set the private defaults
     this._unsubscribeAll = new Subject();
   }

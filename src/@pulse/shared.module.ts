@@ -1,5 +1,9 @@
 import { NgModule } from '@angular/core';
 
-@NgModule({})
+import { PulseMediaService } from './services'
+
+@NgModule({
+  providers: [PulseMediaService]
+})
 
 export class PulseSharedModule { }
