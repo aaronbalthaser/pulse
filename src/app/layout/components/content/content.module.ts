@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
-import { ContentComponent } from 'app/layout/components/content/container/Content.component';
+import { ContentComponent } from 'app/layout/components/content/container/content.component';
 
 @NgModule({
   imports: [

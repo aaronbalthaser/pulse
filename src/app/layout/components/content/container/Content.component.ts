@@ -2,8 +2,8 @@ import { Component, ViewEncapsulation } from '@angular/core';
 
 @Component({
   selector: 'content',
-  templateUrl: './Content.component.html',
-  styleUrls: ['./Content.component.scss'],
+  templateUrl: './content.component.html',
+  styleUrls: ['./content.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
 

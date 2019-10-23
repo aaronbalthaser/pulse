@@ -6,8 +6,8 @@ import { PulseConfigService } from '@pulse/services/config.service';
 
 @Component({
   selector: 'pulse-sidebar',
-  styleUrls: ['./Sidebar.component.scss'],
-  templateUrl: './Sidebar.component.html'
+  styleUrls: ['./sidebar.component.scss'],
+  templateUrl: './sidebar.component.html'
 })
 
 export class PulseSidebarComponent implements OnInit, OnDestroy {
