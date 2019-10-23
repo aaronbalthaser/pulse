@@ -6,7 +6,9 @@ import { RouterModule } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 /* Pulse Modules */
-import { PulseModule } from '@pulse/pulse.module';
+import { PulseModule } from '@pulse';
+import { PulseSharedModule } from '@pulse';
+import { PulseSidebarModule } from '@pulse/components';
 
 /* App Modules */
 import { LayoutModule } from 'app/layout';
@@ -22,7 +24,7 @@ import { config } from './config';
 /* Application Routes */
 const appRoutes = [
   { path: 'apps', loadChildren: './main/apps/apps.module#AppsModule' },
-  { path: '**', redirectTo: '/' }
+  { path: '**', redirectTo: 'apps' }
 ];
 
 @NgModule({
@@ -31,7 +33,10 @@ const appRoutes = [
     FontAwesomeModule,
     RouterModule.forRoot(appRoutes),
 
+    /* Pulse Modules */
     PulseModule.forRoot(config),
+    PulseSharedModule,
+    PulseSidebarModule,
 
     LayoutModule
   ],

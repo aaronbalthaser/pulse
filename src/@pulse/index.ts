@@ -1,1 +1,2 @@
-export { PulseModule } from './pulse.module';
+export * from './pulse.module';
+export * from './shared.module';

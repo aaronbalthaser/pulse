@@ -1,1 +1,0 @@
-export { VerticalLayout1Module } from './layout-1.module';

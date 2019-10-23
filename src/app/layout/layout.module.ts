@@ -1,8 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { VerticalLayout1Module } from './vertical/layout-1';
-import { VerticalLayout2Module } from './vertical/layout-2';
+import { VerticalLayout1Module, VerticalLayout2Module } from './vertical';
 
 @NgModule({
   imports: [
