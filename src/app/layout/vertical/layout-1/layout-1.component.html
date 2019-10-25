@@ -1,6 +1,21 @@
 <div id="main">
-  <!-- CONTENT -->
-  <content></content>
-  <!-- / CONTENT -->
+  <!-- TOOLBAR: Above -->
+  <div id="container-1" class="container">
+    <ng-container *ngIf="config.layout.navbar.position === 'left'">
+      <ng-container *ngTemplateOutlet="leftNavbar"></ng-container>
+    </ng-container>
+    <div id="container-2" class="container">
+      <!-- TOOLBAR: Below fixed -->
+      <div id="container-3" class="container">
+        <!-- CONTENT -->
+        <content></content>
+        <!-- / CONTENT -->
+      </div>
+    </div>
+  </div>
+
 </div>
-<pulse-sidebar></pulse-sidebar>
+
+<ng-template #leftNavbar>
+  <pulse-sidebar></pulse-sidebar>
+</ng-template>

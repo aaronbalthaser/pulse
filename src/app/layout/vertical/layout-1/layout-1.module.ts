@@ -1,4 +1,5 @@
 import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 import { PulseSidebarModule } from '@pulse/components';
 
@@ -9,6 +10,7 @@ import { VerticalLayout1Component } from './layout-1.component';
 @NgModule({
   imports: [
     PulseSidebarModule,
+    CommonModule,
 
     ContentModule
   ],

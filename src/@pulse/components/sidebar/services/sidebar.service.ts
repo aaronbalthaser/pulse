@@ -54,4 +54,3 @@ export class PulseSidebarService {
     return this._registry[key];
   }
 }
-
