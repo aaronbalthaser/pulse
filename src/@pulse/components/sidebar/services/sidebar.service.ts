@@ -16,7 +16,7 @@ export class PulseSidebarService {
    * @param key
    * @param sidebar
    */
-  register(key, sidebar): void {
+  public register(key, sidebar): void {
     if (this._registry[key]) {
       console.error(`The sidebar with the key '${key}' already exists. Either unregister it first or use a unique key.`);
 
@@ -32,7 +32,7 @@ export class PulseSidebarService {
    *
    * @param key
    */
-  unregister(key): void {
+  public unregister(key): void {
     if (!this._registry[key]) {
       console.warn(`The sidebar with the key '${key}' doesn't exist in the registry.`);
 
@@ -43,7 +43,7 @@ export class PulseSidebarService {
     delete this._registry[key];
   }
 
-  getSidebar(key): PulseSidebarComponent {
+  public getSidebar(key): PulseSidebarComponent {
     if (!this._registry[key]) {
       console.warn(`The sidebar with the key '${key}' doesn't exist in the registry.`);
 

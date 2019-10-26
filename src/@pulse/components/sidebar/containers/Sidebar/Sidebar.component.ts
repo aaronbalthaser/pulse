@@ -7,6 +7,8 @@ import { takeUntil } from 'rxjs/operators';
 import { PulseConfigService, PulseMediaService } from '@pulse/services';
 import { PulseSidebarService } from '@pulse/components/sidebar/services';
 
+import constants from '../../sidebar.constants';
+
 @Component({
   selector: 'pulse-sidebar',
   styleUrls: ['./sidebar.component.scss'],
@@ -101,21 +103,179 @@ export class PulseSidebarComponent implements OnInit, OnDestroy {
     this._unsubscribeAll = new Subject();
   }
 
+  @Input() set folded(value: boolean) {
+    // Set the folded
+    this._folded = value;
 
+    // Return if the sidebar is closed
+    if (!this.opened) {
+      return;
+    }
+  }
+
+  get folded(): boolean {
+    return this._folded;
+  }
 
   ngOnInit(): void {
     this._pulseConfigService.config
       .pipe(takeUntil(this._unsubscribeAll))
       .subscribe(config => {
         this._config = config;
-
-        console.log(this._config);
       });
+
+    // Register the sidebar
+    this._pulseSidebarService.register(this.name, this);
+
+    // Setup visibility
+    this._setupVisibility();
+
+    // Setup position
+    this._setupPosition();
+
+    // Setup lockedOpen
+    this._setupLockedOpen();
+
+    // Setup folded
+    this._setupFolded();
+
+    this._console()
   }
 
   ngOnDestroy(): void {
     // Unsubscribe from all subscriptions
     this._unsubscribeAll.next();
     this._unsubscribeAll.complete();
+  }
+
+  /**
+   * ===========================
+   * Private Methods
+   * ===========================
+   */
+
+  // Hides the element
+  private _setupVisibility(): void {
+
+    // Remove the exitsting box-shadow
+    this._renderer.setStyle(this._elementRef.nativeElement, 'box-shadow', 'none');
+
+    // Make the sidebar invisible
+    this._renderer.setStyle(this._elementRef.nativeElement, 'visibility', 'hidden');
+  }
+
+  private _setupPosition() {
+    const position = this.position === 'right'
+      ? constants.positionRt
+      : constants.positionLt;
+
+    this._renderer.addClass(this._elementRef.nativeElement, position);
+  }
+
+  private _setupLockedOpen() {
+    if (!this.lockedOpen) {
+      return;
+    }
+
+    // Set the wasActive for the first time
+    this._wasActive = false;
+
+    this._wasFolded = this.folded;
+
+    this._showSidebar();
+
+    this._pulseMediaService.onMediaChange
+      .pipe(takeUntil(this._unsubscribeAll))
+      .subscribe(() => {
+
+        // Not working
+        const isActive = this._mediaObserver.isActive(this.lockedOpen);
+
+        // If the both status are the same, don't act
+        if (this._wasActive === isActive) {
+          return;
+        }
+
+        if (isActive) {
+          // Set the lockedOpen status
+          this.isLockedOpen = true;
+
+          // Show the sidebar
+          this._showSidebar();
+
+          // Force the the opened status to true
+          this.opened = true;
+
+          // Emit the 'openedChanged' event
+          this.openedChanged.emit(this.opened);
+
+          // Hide the backdrop if any exists
+          this._hideBackdrop();
+        } else {
+
+        }
+      });
+  }
+
+  private _setupFolded() {
+
+    // Return, if sidebar is not folded
+    if (!this.folded) {
+      return;
+    }
+
+    // Return if the sidebar is closed
+    if (!this.opened) {
+      return;
+    }
+  }
+
+  private _showSidebar() {
+
+    // Remove the box-shadow style
+    this._renderer.removeStyle(this._elementRef.nativeElement, 'box-shadow');
+
+    // Make the sidebar invisible
+    this._renderer.removeStyle(this._elementRef.nativeElement, 'visibility');
+
+    // Mark for check
+    this._changeDetectorRef.markForCheck();
+  }
+
+  private _console() {
+    let el = this._elementRef.nativeElement;
+  }
+
+  /**
+  * Enable the animations
+  *
+  * @private
+  */
+  private _enableAnimations(): void {
+
+    // Return if animations already enabled
+    if (this._animationsEnabled) {
+      return;
+    }
+
+    // Enable the animations
+    this._animationsEnabled = true;
+
+    // Mark for check
+    this._changeDetectorRef.markForCheck();
+  }
+
+  /**
+   * Hide the backdrop
+   *
+   * @private
+   */
+  private _hideBackdrop(): void {
+    if (!this._backdrop) {
+      return;
+    }
+
+    // Mark for check
+    this._changeDetectorRef.markForCheck();
   }
 }

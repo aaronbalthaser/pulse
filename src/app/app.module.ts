@@ -1,6 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 /* Third Party Modules */
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
@@ -31,6 +32,7 @@ const appRoutes = [
 @NgModule({
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
     FontAwesomeModule,
     FlexLayoutModule,
     RouterModule.forRoot(appRoutes),

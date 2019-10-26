@@ -17,5 +17,8 @@
 </div>
 
 <ng-template #leftNavbar>
-  <pulse-sidebar></pulse-sidebar>
+  <pulse-sidebar name="navbar" class="navbar-fuse-sidebar" [folded]="config.layout.navbar.folded" lockedOpen="gt-md"
+    *ngIf="!config.layout.navbar.hidden">
+    <div>Sidebar</div>
+  </pulse-sidebar>
 </ng-template>
