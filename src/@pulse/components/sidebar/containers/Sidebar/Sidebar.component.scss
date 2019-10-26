@@ -1,6 +1,6 @@
 @import "src/@pulse/scss/pulse";
 
-fuse-sidebar {
+pulse-sidebar {
   display: flex;
   flex-direction: column;
   flex: 1 0 auto;
@@ -62,4 +62,9 @@ fuse-sidebar {
   right: 0;
   z-index: 999;
   opacity: 0;
+}
+
+.fake-sideboar-children {
+  max-width: 140px;
+  background-color: #efefef;
 }

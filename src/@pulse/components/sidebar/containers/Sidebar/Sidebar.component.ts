@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input, Output, HostBinding, EventEmitter, ElementRef, Renderer2, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, Output, HostBinding, EventEmitter, ElementRef, Renderer2, ChangeDetectorRef, HostListener, ViewEncapsulation } from '@angular/core';
 import { AnimationBuilder, AnimationPlayer } from '@angular/animations';
 import { MediaObserver } from '@angular/flex-layout';
 import { Subject } from 'rxjs';
@@ -12,7 +12,8 @@ import constants from '../../sidebar.constants';
 @Component({
   selector: 'pulse-sidebar',
   styleUrls: ['./sidebar.component.scss'],
-  templateUrl: './sidebar.component.html'
+  templateUrl: './sidebar.component.html',
+  encapsulation: ViewEncapsulation.None
 })
 
 export class PulseSidebarComponent implements OnInit, OnDestroy {
@@ -103,6 +104,12 @@ export class PulseSidebarComponent implements OnInit, OnDestroy {
     this._unsubscribeAll = new Subject();
   }
 
+  /**
+   * ===========================
+   * Accessors
+   * ===========================
+   */
+
   @Input() set folded(value: boolean) {
     // Set the folded
     this._folded = value;
@@ -117,6 +124,11 @@ export class PulseSidebarComponent implements OnInit, OnDestroy {
     return this._folded;
   }
 
+  /**
+   * ===========================
+   * Lifecycle Methods
+   * ===========================
+   */
   ngOnInit(): void {
     this._pulseConfigService.config
       .pipe(takeUntil(this._unsubscribeAll))
@@ -139,6 +151,7 @@ export class PulseSidebarComponent implements OnInit, OnDestroy {
     // Setup folded
     this._setupFolded();
 
+    // DEBUG - DELETE THIS
     this._console()
   }
 
@@ -191,7 +204,11 @@ export class PulseSidebarComponent implements OnInit, OnDestroy {
         // Not working
         const isActive = this._mediaObserver.isActive(this.lockedOpen);
 
-        // If the both status are the same, don't act
+        /**
+         * If both status are the same, don't act. This will happen during 
+         * initial load when the sidenav is not locked open and is instead
+         * collapsed.
+         */
         if (this._wasActive === isActive) {
           return;
         }
@@ -213,7 +230,17 @@ export class PulseSidebarComponent implements OnInit, OnDestroy {
           this._hideBackdrop();
         } else {
 
+          this.isLockedOpen = false;
+
+          this.opened = false;
+
+          this.openedChanged.emit(this.opened);
+
+          this._hideSidebar();
         }
+
+        // Store the new active status
+        this._wasActive = isActive;
       });
   }
 
@@ -230,20 +257,33 @@ export class PulseSidebarComponent implements OnInit, OnDestroy {
     }
   }
 
-  private _showSidebar() {
-
-    // Remove the box-shadow style
-    this._renderer.removeStyle(this._elementRef.nativeElement, 'box-shadow');
-
-    // Make the sidebar invisible
-    this._renderer.removeStyle(this._elementRef.nativeElement, 'visibility');
+  private _hideBackdrop(): void {
+    if (!this._backdrop) {
+      return;
+    }
 
     // Mark for check
     this._changeDetectorRef.markForCheck();
   }
 
-  private _console() {
-    let el = this._elementRef.nativeElement;
+  private _showSidebar() {
+    this._renderer.removeStyle(this._elementRef.nativeElement, 'box-shadow');
+
+    this._renderer.removeStyle(this._elementRef.nativeElement, 'visibility');
+
+    this._changeDetectorRef.markForCheck();
+  }
+
+  private _hideSidebar(isDelayed = true): void {
+    const delay = isDelayed ? 300 : 0;
+
+    setTimeout(() => {
+      this._renderer.setStyle(this._elementRef.nativeElement, 'box-shadow', 'none');
+
+      this._renderer.setStyle(this._elementRef.nativeElement, 'visibility', 'hidden');
+    }, delay);
+
+    this._changeDetectorRef.markForCheck();
   }
 
   /**
@@ -266,16 +306,78 @@ export class PulseSidebarComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Hide the backdrop
-   *
-   * @private
+   * ===========================
+   * Public Methods
+   * ===========================
    */
-  private _hideBackdrop(): void {
-    if (!this._backdrop) {
+
+  public unfoldTemporarily() {
+    if (!this.folded) {
       return;
     }
 
+    this._enableAnimations();
+
+    this.unfolded = true;
+
+    // Remove the folded width
+    this._renderer.removeStyle(this._elementRef.nativeElement, 'width');
+    this._renderer.removeStyle(this._elementRef.nativeElement, 'min-width');
+    this._renderer.removeStyle(this._elementRef.nativeElement, 'max-width');
+
     // Mark for check
     this._changeDetectorRef.markForCheck();
+  }
+
+  public foldTemporarily() {
+
+    // Only work if the sidebar is folded
+    if (!this.folded) {
+      return;
+    }
+
+    this._enableAnimations();
+
+    // Fold the sidebar back
+    this.unfolded = false;
+
+    // Set the folded width
+    const styleValue = this.foldedWidth + 'px';
+
+    this._renderer.setStyle(this._elementRef.nativeElement, 'width', styleValue);
+    this._renderer.setStyle(this._elementRef.nativeElement, 'min-width', styleValue);
+    this._renderer.setStyle(this._elementRef.nativeElement, 'max-width', styleValue);
+
+    // Mark for check
+    this._changeDetectorRef.markForCheck();
+  }
+
+  /**
+   * ===========================
+   * Host Listeners
+   * ===========================
+   */
+
+  @HostListener('mouseenter')
+  onMouseEnter(): void {
+    if (!this.foldedAutoTriggerOnHover) {
+      return;
+    }
+
+    this.unfoldTemporarily();
+  }
+
+  @HostListener('mouseleave')
+  onMouseLeave(): void {
+    if (!this.foldedAutoTriggerOnHover) {
+      return;
+    }
+
+    this.foldTemporarily();
+  }
+
+  // DEBUG - DELETE THIS
+  private _console() {
+    let el = this._elementRef.nativeElement;
   }
 }
