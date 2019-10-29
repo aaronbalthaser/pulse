@@ -34,7 +34,6 @@ export class VerticalLayout1Component implements OnInit, OnDestroy {
       .pipe(takeUntil(this._unsubscribeAll))
       .subscribe(config => {
         this.config = config;
-        console.log(this.config);
       });
   }
 

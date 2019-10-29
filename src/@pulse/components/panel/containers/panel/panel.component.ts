@@ -1,22 +1,29 @@
 import { Component, OnInit, OnDestroy, Input, Output, HostBinding, EventEmitter, ElementRef, Renderer2, ChangeDetectorRef, HostListener, ViewEncapsulation } from '@angular/core';
-import { AnimationBuilder, AnimationPlayer } from '@angular/animations';
+import { AnimationBuilder, AnimationPlayer, animate, style } from '@angular/animations';
 import { MediaObserver } from '@angular/flex-layout';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { PulseConfigService, PulseMediaService } from '@pulse/services';
-import { PulseSidebarService } from '@pulse/components/sidebar/services';
+import { PulsePanelService } from '@pulse/components/panel/services';
 
-import constants from '../../sidebar.constants';
+import constants from '../../panel.constants';
 
+/**
+ * Generic panel component.
+ * 
+ * Required:
+ * - Name: name - maps the component to the service.
+ * - Input: folded - overrides default rendering 
+ */
 @Component({
-  selector: 'pulse-sidebar',
-  styleUrls: ['./sidebar.component.scss'],
-  templateUrl: './sidebar.component.html',
+  selector: 'pulse-panel',
+  styleUrls: ['./panel.component.scss'],
+  templateUrl: './panel.component.html',
   encapsulation: ViewEncapsulation.None
 })
 
-export class PulseSidebarComponent implements OnInit, OnDestroy {
+export class PulsePanelComponent implements OnInit, OnDestroy {
 
   // Name
   @Input() name: string;
@@ -71,7 +78,7 @@ export class PulseSidebarComponent implements OnInit, OnDestroy {
    *
    * @param {PulseConfigService} _pulseConfigService
    * @param {PulseMediaService} _pulseMediaService
-   * @param {PulseSidebarService} _pulseSidebarService
+   * @param {PulsePanelService} _pulsePanelService
    * @param {MediaObserver} _mediaObserver
    * @param {ElementRef} _elementRef
    * @param {Renderer2} _renderer
@@ -81,7 +88,7 @@ export class PulseSidebarComponent implements OnInit, OnDestroy {
   constructor(
     private _pulseConfigService: PulseConfigService,
     private _pulseMediaService: PulseMediaService,
-    private _pulseSidebarService: PulseSidebarService,
+    private _pulsePanelService: PulsePanelService,
     private _mediaObserver: MediaObserver,
     private _elementRef: ElementRef,
     private _renderer: Renderer2,
@@ -110,14 +117,67 @@ export class PulseSidebarComponent implements OnInit, OnDestroy {
    * ===========================
    */
 
+  /**
+   * Sets the folded property passed into the component rendering 
+   * the panel in the folded/unfolded position and removes the padding 
+   * of the sibling DOM node if folded. The sibling refers to the actual 
+   * DOM node in reference from the component selector and excluding 
+   * any ng-template or ng-container selectors.
+   * 
+   * @param {boolean} value : Passed in as an <@Input> and determines if 
+   * the panel will be folded or unfolded. This only has an effect if the 
+   * panel is locked open.
+   */
   @Input() set folded(value: boolean) {
     // Set the folded
     this._folded = value;
 
-    // Return if the sidebar is closed
+    // Return if the panel if closed
     if (!this.opened) {
       return;
     }
+
+    let sibling;
+    let styleRule;
+
+    const styleValue = this.foldedWidth + 'px';
+
+    // Get the sibling and set the style rule
+    if (this.position === 'left') {
+      sibling = this._elementRef.nativeElement.nextElementSibling;
+      styleRule = 'padding-left';
+    } else {
+      sibling = this._elementRef.nativeElement.previousElementSibling;
+      styleRule = 'padding-right';
+    }
+
+    // If there is no sibling, return...
+    if (!sibling) {
+      return;
+    }
+
+    if (value) {
+      this.fold();
+
+      this._renderer.setStyle(this._elementRef.nativeElement, 'width', styleValue);
+      this._renderer.setStyle(this._elementRef.nativeElement, 'min-width', styleValue);
+      this._renderer.setStyle(this._elementRef.nativeElement, 'max-width', styleValue);
+
+      this._renderer.setStyle(sibling, styleRule, styleValue);
+      this._renderer.addClass(this._elementRef.nativeElement, 'folded');
+    } else {
+
+      this.unfold();
+
+      this._renderer.removeStyle(this._elementRef.nativeElement, 'width');
+      this._renderer.removeStyle(this._elementRef.nativeElement, 'min-width');
+      this._renderer.removeStyle(this._elementRef.nativeElement, 'max-width');
+
+      this._renderer.removeStyle(sibling, styleRule);
+      this._renderer.removeClass(this._elementRef.nativeElement, 'folded');
+    }
+
+    this.foldedChanged.emit(this.folded);
   }
 
   get folded(): boolean {
@@ -136,8 +196,8 @@ export class PulseSidebarComponent implements OnInit, OnDestroy {
         this._config = config;
       });
 
-    // Register the sidebar
-    this._pulseSidebarService.register(this.name, this);
+    // Register the panel
+    this._pulsePanelService.register(this.name, this);
 
     // Setup visibility
     this._setupVisibility();
@@ -150,12 +210,16 @@ export class PulseSidebarComponent implements OnInit, OnDestroy {
 
     // Setup folded
     this._setupFolded();
-
-    // DEBUG - DELETE THIS
-    this._console()
   }
 
   ngOnDestroy(): void {
+    if (this.folded) {
+      this.unfold();
+    }
+
+    // Unregister the sidebar
+    this._pulsePanelService.unregister(this.name);
+
     // Unsubscribe from all subscriptions
     this._unsubscribeAll.next();
     this._unsubscribeAll.complete();
@@ -173,11 +237,11 @@ export class PulseSidebarComponent implements OnInit, OnDestroy {
     // Remove the exitsting box-shadow
     this._renderer.setStyle(this._elementRef.nativeElement, 'box-shadow', 'none');
 
-    // Make the sidebar invisible
+    // Make the panel invisible
     this._renderer.setStyle(this._elementRef.nativeElement, 'visibility', 'hidden');
   }
 
-  private _setupPosition() {
+  private _setupPosition(): void {
     const position = this.position === 'right'
       ? constants.positionRt
       : constants.positionLt;
@@ -185,7 +249,7 @@ export class PulseSidebarComponent implements OnInit, OnDestroy {
     this._renderer.addClass(this._elementRef.nativeElement, position);
   }
 
-  private _setupLockedOpen() {
+  private _setupLockedOpen(): void {
     if (!this.lockedOpen) {
       return;
     }
@@ -195,13 +259,21 @@ export class PulseSidebarComponent implements OnInit, OnDestroy {
 
     this._wasFolded = this.folded;
 
-    this._showSidebar();
+    this._showPanel();
 
     this._pulseMediaService.onMediaChange
       .pipe(takeUntil(this._unsubscribeAll))
       .subscribe(() => {
 
-        // Not working
+        /**
+         * This flag will be true under two conditions:
+         * 1. the lockedOpen <@Input> was passed in signaling there's a 
+         *    media query being watched to set the panel to the locked 
+         *    open position.
+         * 2. the media query value from the lockedOpen ie., "gt-md" 
+         *    matches the browsers current screen resolution triggering
+         *    the Observable response. 
+         */
         const isActive = this._mediaObserver.isActive(this.lockedOpen);
 
         /**
@@ -217,14 +289,23 @@ export class PulseSidebarComponent implements OnInit, OnDestroy {
           // Set the lockedOpen status
           this.isLockedOpen = true;
 
-          // Show the sidebar
-          this._showSidebar();
+          // Show the panel
+          this._showPanel();
 
           // Force the the opened status to true
           this.opened = true;
 
           // Emit the 'openedChanged' event
           this.openedChanged.emit(this.opened);
+
+          // If the panel was folded, forcefully fold it again
+          if (this._wasFolded) {
+            this._enableAnimations();
+
+            this.folded = true;
+
+            this._changeDetectorRef.markForCheck();
+          }
 
           // Hide the backdrop if any exists
           this._hideBackdrop();
@@ -236,7 +317,7 @@ export class PulseSidebarComponent implements OnInit, OnDestroy {
 
           this.openedChanged.emit(this.opened);
 
-          this._hideSidebar();
+          this._hidePanel();
         }
 
         // Store the new active status
@@ -244,29 +325,20 @@ export class PulseSidebarComponent implements OnInit, OnDestroy {
       });
   }
 
-  private _setupFolded() {
+  private _setupFolded(): void {
 
-    // Return, if sidebar is not folded
+    // Return, if panel is not folded
     if (!this.folded) {
       return;
     }
 
-    // Return if the sidebar is closed
+    // Return if the panel is closed
     if (!this.opened) {
       return;
     }
   }
 
-  private _hideBackdrop(): void {
-    if (!this._backdrop) {
-      return;
-    }
-
-    // Mark for check
-    this._changeDetectorRef.markForCheck();
-  }
-
-  private _showSidebar() {
+  private _showPanel() {
     this._renderer.removeStyle(this._elementRef.nativeElement, 'box-shadow');
 
     this._renderer.removeStyle(this._elementRef.nativeElement, 'visibility');
@@ -274,7 +346,7 @@ export class PulseSidebarComponent implements OnInit, OnDestroy {
     this._changeDetectorRef.markForCheck();
   }
 
-  private _hideSidebar(isDelayed = true): void {
+  private _hidePanel(isDelayed = true): void {
     const delay = isDelayed ? 300 : 0;
 
     setTimeout(() => {
@@ -286,13 +358,61 @@ export class PulseSidebarComponent implements OnInit, OnDestroy {
     this._changeDetectorRef.markForCheck();
   }
 
+  private _showBackdrop(): void {
+    this._backdrop = this._renderer.createElement('div');
+
+    this._backdrop.classList.add('pulse-panel-overlay');
+
+    if (this.invisibleOverlay) {
+      this._backdrop.classList.add('pulse-panel-overlay-invisible');
+    }
+
+    this._renderer.appendChild(this._elementRef.nativeElement.parentElement, this._backdrop);
+
+    // Create the enter animation and attach it to the player
+    this._player =
+      this._animationBuilder
+        .build([animate('300ms ease', style({ opacity: 1 }))])
+        .create(this._backdrop);
+
+    // Play the animation
+    this._player.play();
+
+    this._backdrop.addEventListener('click', () => {
+      this.close();
+    });
+  }
+
+  private _hideBackdrop(): void {
+    if (!this._backdrop) {
+      return;
+    }
+
+    this._player =
+      this._animationBuilder
+        .build([animate('300ms ease', style({ opacity: 0 }))])
+        .create(this._backdrop);
+
+    // Play the animation
+    this._player.play();
+
+    this._player.onDone(() => {
+      // remove backdrop listener
+
+      this._backdrop.parentNode.removeChild(this._backdrop);
+      this._backdrop = null;
+    });
+
+    // Mark for check
+    this._changeDetectorRef.markForCheck();
+  }
+
   /**
   * Enable the animations
   *
   * @private
   */
   private _enableAnimations(): void {
-
     // Return if animations already enabled
     if (this._animationsEnabled) {
       return;
@@ -311,7 +431,29 @@ export class PulseSidebarComponent implements OnInit, OnDestroy {
    * ===========================
    */
 
-  public unfoldTemporarily() {
+  public foldTemporarily(): void {
+    // Only work if the panel is folded
+    if (!this.folded) {
+      return;
+    }
+
+    this._enableAnimations();
+
+    // Fold the panel back
+    this.unfolded = false;
+
+    // Set the folded width
+    const styleValue = this.foldedWidth + 'px';
+
+    this._renderer.setStyle(this._elementRef.nativeElement, 'width', styleValue);
+    this._renderer.setStyle(this._elementRef.nativeElement, 'min-width', styleValue);
+    this._renderer.setStyle(this._elementRef.nativeElement, 'max-width', styleValue);
+
+    // Mark for check
+    this._changeDetectorRef.markForCheck();
+  }
+
+  public unfoldTemporarily(): void {
     if (!this.folded) {
       return;
     }
@@ -329,27 +471,81 @@ export class PulseSidebarComponent implements OnInit, OnDestroy {
     this._changeDetectorRef.markForCheck();
   }
 
-  public foldTemporarily() {
+  public fold(): void {
+    if (this.folded) {
+      return;
+    }
 
-    // Only work if the sidebar is folded
+    this._enableAnimations();
+
+    this.folded = true;
+
+    this._changeDetectorRef.markForCheck();
+  }
+
+  public unfold(): void {
     if (!this.folded) {
       return;
     }
 
     this._enableAnimations();
 
-    // Fold the sidebar back
-    this.unfolded = false;
+    this.folded = false;
 
-    // Set the folded width
-    const styleValue = this.foldedWidth + 'px';
-
-    this._renderer.setStyle(this._elementRef.nativeElement, 'width', styleValue);
-    this._renderer.setStyle(this._elementRef.nativeElement, 'min-width', styleValue);
-    this._renderer.setStyle(this._elementRef.nativeElement, 'max-width', styleValue);
-
-    // Mark for check
     this._changeDetectorRef.markForCheck();
+  }
+
+  public toggleFold(): void {
+    if (this.folded) {
+      this.unfold();
+    }
+    else {
+      this.fold();
+    }
+  }
+
+  public open(): void {
+    if (this.opened || this.isLockedOpen) {
+      return;
+    }
+
+    this._enableAnimations();
+
+    this._showPanel();
+
+    this._showBackdrop();
+
+    this.opened = true;
+
+    this.openedChanged.emit(this.opened);
+
+    this._changeDetectorRef.markForCheck();
+  }
+
+  public close(): void {
+    if (!this.opened || this.isLockedOpen) {
+      return;
+    }
+
+    this._enableAnimations();
+
+    this._hideBackdrop();
+
+    this.opened = false;
+
+    this.openedChanged.emit(this.opened);
+
+    this._hidePanel();
+
+    this._changeDetectorRef.markForCheck();
+  }
+
+  public toggleOpen(): void {
+    if (this.opened) {
+      this.close();
+    } else {
+      this.open();
+    }
   }
 
   /**
@@ -374,10 +570,5 @@ export class PulseSidebarComponent implements OnInit, OnDestroy {
     }
 
     this.foldTemporarily();
-  }
-
-  // DEBUG - DELETE THIS
-  private _console() {
-    let el = this._elementRef.nativeElement;
   }
 }

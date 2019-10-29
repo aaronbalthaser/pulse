@@ -1,6 +1,6 @@
-const sidebarConstants = {
+const panelConstants = {
   positionRt: 'right-positioned',
   positionLt: 'left-positioned'
 };
 
-export default sidebarConstants;
+export default panelConstants;

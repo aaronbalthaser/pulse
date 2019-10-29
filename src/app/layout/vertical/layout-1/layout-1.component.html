@@ -6,7 +6,8 @@
     </ng-container>
     <div id="container-2" class="container">
       <!-- TOOLBAR: Below fixed -->
-      <div id="container-3" class="container">
+      <toolbar></toolbar>
+      <div id="container-3">
         <!-- CONTENT -->
         <content></content>
         <!-- / CONTENT -->
@@ -17,8 +18,8 @@
 </div>
 
 <ng-template #leftNavbar>
-  <pulse-sidebar name="navbar" class="navbar-fuse-sidebar" [folded]="config.layout.navbar.folded" lockedOpen="gt-md"
+  <pulse-panel name="navbar" class="navbar-pulse-panel" [folded]="config.layout.navbar.folded" lockedOpen="gt-md"
     *ngIf="!config.layout.navbar.hidden">
-    <div>Sidebar</div>
-  </pulse-sidebar>
+    <navbar [variant]="config.layout.navbar.variant"></navbar>
+  </pulse-panel>
 </ng-template>

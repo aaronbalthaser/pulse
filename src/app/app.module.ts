@@ -10,7 +10,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 /* Pulse Modules */
 import { PulseModule } from '@pulse';
 import { PulseSharedModule } from '@pulse';
-import { PulseSidebarModule } from '@pulse/components';
+import { PulsePanelModule } from '@pulse/components';
 
 /* App Modules */
 import { LayoutModule } from 'app/layout';
@@ -40,7 +40,7 @@ const appRoutes = [
     /* Pulse Modules */
     PulseModule.forRoot(config),
     PulseSharedModule,
-    PulseSidebarModule,
+    PulsePanelModule,
 
     LayoutModule
   ],

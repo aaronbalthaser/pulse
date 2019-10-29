@@ -1,1 +1,1 @@
-export * from './sidebar/sidebar.module';
+export * from './panel/panel.module';

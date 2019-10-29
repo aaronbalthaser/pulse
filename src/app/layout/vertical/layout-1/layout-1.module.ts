@@ -1,18 +1,22 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { PulseSidebarModule } from '@pulse/components';
+import { PulsePanelModule } from '@pulse/components';
 
-import { ContentModule } from 'app/layout/components/content/content.module';
+import { ContentModule } from 'app/layout/components';
+import { NavbarModule } from 'app/layout/components';
+import { ToolbarModule } from 'app/layout/components';
 
 import { VerticalLayout1Component } from './layout-1.component';
 
 @NgModule({
   imports: [
-    PulseSidebarModule,
+    PulsePanelModule,
     CommonModule,
 
-    ContentModule
+    ContentModule,
+    NavbarModule,
+    ToolbarModule
   ],
   declarations: [
     VerticalLayout1Component

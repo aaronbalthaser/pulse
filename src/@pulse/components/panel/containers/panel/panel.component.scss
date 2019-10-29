@@ -1,6 +1,6 @@
 @import "src/@pulse/scss/pulse";
 
-pulse-sidebar {
+pulse-panel {
   display: flex;
   flex-direction: column;
   flex: 1 0 auto;
@@ -54,7 +54,7 @@ pulse-sidebar {
   }
 }
 
-.fuse-sidebar-overlay {
+.pulse-panel-overlay {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -64,7 +64,7 @@ pulse-sidebar {
   opacity: 0;
 }
 
-.fake-sideboar-children {
+.fake-panel-children {
   max-width: 140px;
   background-color: #efefef;
 }
