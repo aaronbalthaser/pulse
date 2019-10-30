@@ -1,13 +1,16 @@
 <div id="main">
-  <!-- TOOLBAR: Above -->
+  <ng-container *ngIf="config.layout.toolbar.position === 'above'">
+    <ng-container *ngTemplateOutlet="toolbar"></ng-container>
+  </ng-container>
   <div id="container-1" class="container">
     <ng-container *ngIf="config.layout.navbar.position === 'left'">
       <ng-container *ngTemplateOutlet="leftNavbar"></ng-container>
     </ng-container>
     <div id="container-2" class="container">
-      <!-- TOOLBAR: Below fixed -->
-      <toolbar></toolbar>
       <div id="container-3">
+        <ng-container *ngIf="config.layout.toolbar.position === 'below-static'">
+          <ng-container *ngTemplateOutlet="toolbar"></ng-container>
+        </ng-container>
         <!-- CONTENT -->
         <content></content>
         <!-- / CONTENT -->
@@ -18,8 +21,14 @@
 </div>
 
 <ng-template #leftNavbar>
-  <pulse-panel name="navbar" class="navbar-pulse-panel" [folded]="config.layout.navbar.folded" lockedOpen="gt-md"
-    *ngIf="!config.layout.navbar.hidden">
+  <pulse-panel name="navbar" class="navbar-pulse-panel" foldedAutoTriggerOnHover=true
+    [folded]="config.layout.navbar.folded" lockedOpen="gt-md" *ngIf="!config.layout.navbar.hidden">
     <navbar [variant]="config.layout.navbar.variant"></navbar>
   </pulse-panel>
+</ng-template>
+
+<ng-template #toolbar>
+  <toolbar *ngIf="!config.layout.toolbar.hidden"
+    [ngClass]="config.layout.toolbar.customBackgroundColor === true ? config.layout.toolbar.position + ' ' + config.layout.toolbar.background : config.layout.toolbar.position">
+  </toolbar>
 </ng-template>

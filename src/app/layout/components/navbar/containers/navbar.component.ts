@@ -12,7 +12,6 @@ import { PulsePanelService } from '@pulse/components/panel';
 
 export class NavbarComponent {
   private _variant: string;
-  private _open: boolean;
 
   constructor(
     private _elementRef: ElementRef,

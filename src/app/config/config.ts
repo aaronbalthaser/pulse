@@ -7,5 +7,11 @@ export const config: any = {
       position: 'left',
       variant: 'vertical-style-1'
     },
+    toolbar: {
+      customBackgroundColor: false,
+      background: '',
+      hidden: false,
+      position: 'below-static'
+    }
   }
 };

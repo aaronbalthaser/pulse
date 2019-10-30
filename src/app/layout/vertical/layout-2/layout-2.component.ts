@@ -23,7 +23,6 @@ export class VerticalLayout2Component implements OnInit, OnDestroy {
    * @param {PulseConfigService} _pulseConfigService
    */
   constructor(private _pulseConfigService: PulseConfigService) {
-    // Set the private defaults
     this._unsubscribeAll = new Subject();
   }
 
@@ -32,13 +31,10 @@ export class VerticalLayout2Component implements OnInit, OnDestroy {
       .pipe(takeUntil(this._unsubscribeAll))
       .subscribe(config => {
         this.config = config;
-
-        console.log(this.config.layout.style);
       });
   }
 
   ngOnDestroy(): void {
-    // Unsubscribe from all subscriptions
     this._unsubscribeAll.next();
     this._unsubscribeAll.complete();
   }

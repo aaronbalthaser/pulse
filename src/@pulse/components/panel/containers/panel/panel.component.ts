@@ -8,13 +8,10 @@ import { PulseConfigService, PulseMediaService } from '@pulse/services';
 import { PulsePanelService } from '@pulse/components/panel/services';
 
 import constants from '../../panel.constants';
+import errors from '../../error.constants';
 
 /**
  * Generic panel component.
- * 
- * Required:
- * - Name: name - maps the component to the service.
- * - Input: folded - overrides default rendering 
  */
 @Component({
   selector: 'pulse-panel',
@@ -34,26 +31,26 @@ export class PulsePanelComponent implements OnInit, OnDestroy {
   // Position
   @Input() position: 'left' | 'right';
 
-  // Open
-  @HostBinding('class.open') opened: boolean;
+  // Folded Width
+  @Input() foldedWidth: number;
 
   // Locked Open
   @Input() lockedOpen: string;
 
-  // Is Locked Open
-  @HostBinding('class.locked-open') isLockedOpen: boolean;
-
-  // Folded Width
-  @Input() foldedWidth: number;
-
   // Folded Auto Trigger On Hover
   @Input() foldedAutoTriggerOnHover: boolean;
 
-  // Folded Unfolded
-  @HostBinding('class.unfolded') unfolded: boolean;
-
   // Invisible Overlay
   @Input() invisibleOverlay: boolean;
+
+  // Open
+  @HostBinding('class.open') opened: boolean;
+
+  // Is Locked Open
+  @HostBinding('class.locked-open') isLockedOpen: boolean;
+
+  // Folded Unfolded
+  @HostBinding('class.unfolded') unfolded: boolean;
 
   // Folded Changed
   @Output() foldedChanged: EventEmitter<boolean>;
@@ -190,10 +187,14 @@ export class PulsePanelComponent implements OnInit, OnDestroy {
    * ===========================
    */
   ngOnInit(): void {
+    if (!this.name) {
+      throw console.error(errors.requiredName);
+    }
+
     this._pulseConfigService.config
       .pipe(takeUntil(this._unsubscribeAll))
       .subscribe(config => {
-        this._config = config;
+        // this._config = config;
       });
 
     // Register the panel
@@ -235,7 +236,7 @@ export class PulsePanelComponent implements OnInit, OnDestroy {
   private _setupVisibility(): void {
 
     // Remove the exitsting box-shadow
-    this._renderer.setStyle(this._elementRef.nativeElement, 'box-shadow', 'none');
+    // this._renderer.setStyle(this._elementRef.nativeElement, 'box-shadow', 'none');
 
     // Make the panel invisible
     this._renderer.setStyle(this._elementRef.nativeElement, 'visibility', 'hidden');
@@ -339,7 +340,7 @@ export class PulsePanelComponent implements OnInit, OnDestroy {
   }
 
   private _showPanel() {
-    this._renderer.removeStyle(this._elementRef.nativeElement, 'box-shadow');
+    // this._renderer.removeStyle(this._elementRef.nativeElement, 'box-shadow');
 
     this._renderer.removeStyle(this._elementRef.nativeElement, 'visibility');
 
@@ -350,7 +351,7 @@ export class PulsePanelComponent implements OnInit, OnDestroy {
     const delay = isDelayed ? 300 : 0;
 
     setTimeout(() => {
-      this._renderer.setStyle(this._elementRef.nativeElement, 'box-shadow', 'none');
+      // this._renderer.setStyle(this._elementRef.nativeElement, 'box-shadow', 'none');
 
       this._renderer.setStyle(this._elementRef.nativeElement, 'visibility', 'hidden');
     }, delay);
@@ -496,6 +497,18 @@ export class PulsePanelComponent implements OnInit, OnDestroy {
   }
 
   public toggleFold(): void {
+    const isActive = this._mediaObserver.isActive(this.lockedOpen);
+
+    /**
+     * prevent toggle fold actions if isLocked media 
+     * isActive returns false. Basically means these 
+     * states will only occur if the panel is in lockedOpen 
+     * status and fold and unfold can be visually visible.
+     */
+    if (!isActive) {
+      return;
+    }
+
     if (this.folded) {
       this.unfold();
     }
