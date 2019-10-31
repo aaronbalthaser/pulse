@@ -4,7 +4,7 @@ import { Component, OnInit } from '@angular/core';
   selector: 'todo',
   styleUrls: ['./todo.component.scss'],
   template: `
-    <div>Todo</div>
+    <div>Todo App</div>
   `
 })
 
